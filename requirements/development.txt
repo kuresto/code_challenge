@@ -11,7 +11,7 @@ pytest==4.2.0
 flake8==3.7.5
 pytest-flake8==1.0.4
 pytest-cov==2.6.1
-pytest-django==3.4.7
+pytest-flask==0.14.0
 pytest-repeat==0.7.0
 
 pyhamcrest==1.9
