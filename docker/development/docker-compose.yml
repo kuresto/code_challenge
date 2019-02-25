@@ -28,6 +28,7 @@ services:
     volumes:
       - ./nginx/proxy_server/:/etc/nginx/conf.d
       - ../../static:/code/static
+      - ../../bluestorm_admin:/code/
     links:
       - bluestorm_api
     depends_on:
