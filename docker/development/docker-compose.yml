@@ -21,12 +21,12 @@ services:
       - bluestorm_db
       - bluestorm_minio
 
-  # Server
-  bluestorm_nginx:
+  # Proxy Server (Workspace)
+  bluestorm_proxy_server:
     restart: always
     image: nginx
     volumes:
-      - ./nginx/:/etc/nginx/conf.d
+      - ./nginx/proxy_server/:/etc/nginx/conf.d
       - ../../static:/code/static
     links:
       - bluestorm_api
