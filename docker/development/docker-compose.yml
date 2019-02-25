@@ -9,6 +9,11 @@ services:
     command: /bin/bash -c "dockerize -wait tcp://bluestorm_db:3306"
     environment:
       - PYTHONUNBUFFERED=0
+      - FLASK_SETTINGS_MODULE=bluestorm_api.settings.development
+      - FLASK_APP=/code/bluestorm_api/
+      - MINIO_ACCESS_KEY=X0UPMLLFW54LALL86ND6
+      - MINIO_SECRET_KEY=F3evyDre0kr4x4u8QFtR6iUmQc+0RVyB/m171TGI
+      - MINIO_HOST=http://bluestorm_minio:9000
     volumes:
       - ../../:/code/
     ports:
