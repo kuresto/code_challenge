@@ -34,6 +34,6 @@ RUN mkdir src
 
 RUN pip install -e .
 
-ADD ./docker/docker-entrypoint.sh /tmp/docker-entrypoint.sh
+ADD ./docker/development/docker-entrypoint.sh /tmp/docker-entrypoint.sh
 
 ENTRYPOINT ["bash", "/tmp/docker-entrypoint.sh"]

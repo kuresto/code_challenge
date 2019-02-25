@@ -1,4 +1,4 @@
-WORKSPACE_CONTAINER=abundantia_app
+WORKSPACE_CONTAINER=bluestorm_api
 
 help: ## make [target]
 	@echo ""
