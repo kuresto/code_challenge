@@ -9,6 +9,8 @@ pylint-flask==0.6
 
 pytest==4.2.0
 flake8==3.7.5
+pytest-env==0.6.2
+pytest-flask-sqlalchemy==1.0.0
 pytest-flake8==1.0.4
 pytest-cov==2.6.1
 pytest-flask==0.14.0
