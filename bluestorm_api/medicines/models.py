@@ -18,10 +18,10 @@ class Medicine(BaseModel):
         ("injection", "injection"),
     ]
 
-    type = ChoiceType(ChoiceType(TYPES), nullable=False)
+    type = db.Column(ChoiceType(TYPES))
     name = db.Column(db.String(120), nullable=False)
     dosage = db.Column(db.Integer, nullable=False)
     measure = db.Column(db.String(16), nullable=False)
     amount = db.Column(db.Numeric(precision=19, scale=4), default=0)
 
-    provider_id = db.Column(db.Integer, db.ForeignKey("Provider.id"), nullable=False)
+    provider_id = db.Column(db.Integer, db.ForeignKey("provider.id"), nullable=False)

@@ -8,4 +8,4 @@ class Provider(BaseModel):
     name = db.Column(db.String(80), nullable=False)
     phone = db.Column(PhoneNumberType, nullable=False)
 
-    medicines = db.relationship("Medicines", backref="provider", lazy=True)
+    medicines = db.relationship("Medicine", backref="provider", lazy=True)
