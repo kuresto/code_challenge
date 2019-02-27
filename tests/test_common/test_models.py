@@ -5,8 +5,17 @@ import pytest
 from ..fixtures.models import FakeModel
 
 
-def test_base_model_creation(db, mixer):
-    fake_model = mixer.blend(FakeModel)
+def test_base_model_creation(db):
+    fake_model = FakeModel.create(**{"name": "fake-name"})
+
+    db_fake_model = FakeModel.query.first()
+
+    assert fake_model == db_fake_model
+
+
+def test_base_model_save(db):
+    fake_model = FakeModel(**{"name": "fake-name"})
+    fake_model.save()
 
     db_fake_model = FakeModel.query.first()
 
@@ -17,10 +26,9 @@ def test_base_model_update(db, mixer):
     fake_model = mixer.blend(FakeModel)
     old_updated = fake_model.updated
 
-    fake_model.name = "fake-2"
-
-    sleep(1)
-    db.session.commit()
+    data = {"name": "fake-2"}
+    sleep(1)  # Test was running too fast :/
+    fake_model.update(**data)
 
     db_fake_model = FakeModel.query.first()
 
@@ -30,8 +38,8 @@ def test_base_model_update(db, mixer):
 
 def test_base_model_removal(db, mixer):
     fake_model = mixer.blend(FakeModel)
+    fake_model.delete()
 
-    db.session.delete(fake_model)
     assert FakeModel.query.count() == 0
 
 
