@@ -38,9 +38,7 @@ def fetch(id):
 def create():
     request_data = request.get_json(force=True)
 
-    instance = Provider(**request_data)
-    db.session.add(instance)
-    db.session.commit()
+    instance = Provider.create(**request_data)
 
     data = schema.jsonify(instance)
     return response_created(data)
