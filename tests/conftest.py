@@ -2,9 +2,11 @@ import pytest
 from webtest import TestApp
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import create_access_token
 
 from mixer.backend.flask import mixer
 
+from bluestorm_api.accounts.models import User
 from bluestorm_api.app import create_app
 from bluestorm_api.db import db as _db
 
@@ -21,14 +23,23 @@ def fixture_app():
     ctx.pop()
 
 
+@pytest.yield_fixture(name="token", autouse=True, scope="function")
+def fixture_token():
+    user = User.create(**{"login": "developer", "password": "developer"})
+    token = create_access_token(identity=user, fresh=True)
+
+    return ("Bearer", token)
+
+
 @pytest.fixture(scope="function")
 def testapp(app):
     return TestApp(app)
 
 
-@pytest.fixture(name="client")
-def fixture_client(app):
-    client = app.test_client()
+@pytest.fixture(name="user_client")
+def fixture_user_client(app, token):
+    client = TestApp(app)
+    client.set_authorization(token)
 
     return client
 

@@ -1,6 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-
-from flask_sqlalchemy import Model
+from sqlalchemy.exc import IntegrityError
+from flask_sqlalchemy import SQLAlchemy, Model
 
 
 class CRUDMixin(Model):
@@ -17,7 +16,11 @@ class CRUDMixin(Model):
     def save(self, commit=True):
         db.session.add(self)
         if commit:
-            db.session.commit()
+            try:
+                db.session.commit()
+            except IntegrityError as exc:
+                db.session.rollback()
+                raise exc
         return self
 
     def delete(self, commit=True):
