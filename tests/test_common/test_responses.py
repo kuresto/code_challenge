@@ -2,6 +2,8 @@ from http import HTTPStatus
 
 import pytest
 
+from flask import make_response
+
 from bluestorm_api.common.responses import (
     response_bad_request,
     response_created,
@@ -12,20 +14,30 @@ from bluestorm_api.common.responses import (
 
 
 def test_response_ok():
-    assert response_ok() == ("", HTTPStatus.OK)
+    response = response_ok()
+    assert response.status_code == HTTPStatus.OK
+    assert response.data == b""
 
 
 def test_response_created():
-    assert response_created() == ("", HTTPStatus.CREATED)
+    response = response_created()
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.data == b""
 
 
 def test_response_no_content():
-    assert response_no_content() == ("", HTTPStatus.NO_CONTENT)
+    response = response_no_content()
+    assert response.status_code == HTTPStatus.NO_CONTENT
+    assert response.data == b""
 
 
 def test_response_not_found():
-    assert response_not_found() == ("", HTTPStatus.NOT_FOUND)
+    response = response_not_found()
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.data == b""
 
 
 def test_response_bad_request():
-    assert response_bad_request() == ("", HTTPStatus.BAD_REQUEST)
+    response = response_bad_request()
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.data == b""

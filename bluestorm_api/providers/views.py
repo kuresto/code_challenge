@@ -1,12 +1,19 @@
-from flask import Blueprint, Response, request
+import json
+
+from flask import g, Blueprint, Response, request
+from flask_expects_json import expects_json
+
 from .models import Provider
 from .schemas import ProviderSchema
 
+from ..common.exceptions import InvalidUsage
 from ..common.responses import (
     response_created,
     response_no_content,
     response_not_found,
     response_ok,
+    response_bad_request,
+    response_listing,
 )
 from ..db import db
 
@@ -17,10 +24,9 @@ schema = ProviderSchema()
 
 @provider_blueprint.route("/", methods=["GET"])
 def listing():
-    instances = Provider.query.all()
-
-    data = schema.jsonify(instances, many=True)
-    return response_ok(data)
+    paginate = Provider.query.paginate()
+    data = schema.jsonify(paginate.items, many=True)
+    return response_listing(paginate, data)
 
 
 @provider_blueprint.route("/<int:id>", methods=["GET"])
@@ -35,8 +41,13 @@ def fetch(id):
 
 
 @provider_blueprint.route("/", methods=["POST"])
+@expects_json(ProviderSchema.json())
 def create():
-    request_data = request.get_json(force=True)
+    request_data = g.data
+
+    errors = schema.validate(request_data)
+    if errors:
+        raise InvalidUsage(errors)
 
     instance = Provider.create(**request_data)
 
@@ -45,8 +56,13 @@ def create():
 
 
 @provider_blueprint.route("/<int:id>", methods=["PUT"])
+@expects_json(ProviderSchema.json())
 def update(id):
-    request_data = request.get_json(force=True)
+    request_data = g.data
+
+    errors = schema.validate(request_data)
+    if errors:
+        raise InvalidUsage(errors)
 
     instance = Provider.query.filter_by(id=id).first()
 
