@@ -13,14 +13,25 @@ from flask_cors import CORS
 def create_app():
     from .db import db
 
-    from .common.exceptions import InvalidUsage
-    from .common.handlers import bad_request_handler
-    from .providers.views import provider_blueprint
+    # Models
+    from .providers.models import Provider
+    from .medicines.models import Medicine
+    from .customers.models import Customer
+    from .accounts.models import User
+
+    # Views
     from .accounts.views import user_blueprint, auth_blueprint
-    from .accounts.utils import jwt_identity, identity_loader
+    from .medicines.views import medicine_blueprint
+    from .providers.views import provider_blueprint
     from .customers.views import customer_blueprint
 
+    # Common
+    from .common.exceptions import InvalidUsage
+    from .common.handlers import bad_request_handler
+    from .accounts.utils import jwt_identity, identity_loader, DecimalJSONEncoder
+
     app = Flask(__name__)
+    app.json_encoder = DecimalJSONEncoder
     app.config.from_object(environ.get("FLASK_SETTINGS_MODULE"))
 
     # database and migrations
@@ -54,5 +65,6 @@ def create_app():
     app.register_blueprint(provider_blueprint)  # Provider
     app.register_blueprint(user_blueprint)  # Users
     app.register_blueprint(customer_blueprint)  # Customers
+    app.register_blueprint(medicine_blueprint)  # Medicines
 
     return app
