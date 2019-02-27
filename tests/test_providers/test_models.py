@@ -14,9 +14,9 @@ def test_provider_model_creation(provider):
 def test_provider_model_update(db, provider):
     old_updated = provider.updated
 
-    provider.name = "another"
-    sleep(1)
-    db.session.commit()
+    new_data = {"name": "another"}
+    sleep(1)  # Test was running too fast :/
+    provider.update(**new_data)
 
     db_provider = Provider.query.first()
 
@@ -25,7 +25,7 @@ def test_provider_model_update(db, provider):
 
 
 def test_provider_model_removal(db, provider):
-    db.session.delete(provider)
+    provider.delete()
     assert Provider.query.count() == 0
 
 
