@@ -5,7 +5,7 @@ from ..db import db
 
 
 class Medicine(BaseModel):
-    TYPES = [
+    KIND = [
         ("tablet", "tablet"),
         ("syrup", "syrup"),
         ("drops", "drops"),
@@ -18,7 +18,7 @@ class Medicine(BaseModel):
         ("injection", "injection"),
     ]
 
-    type = db.Column(ChoiceType(TYPES))
+    kind = db.Column(ChoiceType(KIND))
     name = db.Column(db.String(120), nullable=False)
     dosage = db.Column(db.Integer, nullable=False)
     measure = db.Column(db.String(16), nullable=False)
