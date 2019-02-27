@@ -2,9 +2,15 @@ import json
 
 from flask import g, Blueprint, Response, request
 from flask_expects_json import expects_json
+from flask_jwt_extended import (
+    jwt_required,
+    jwt_optional,
+    create_access_token,
+    current_user,
+)
 
-from .models import Provider
-from .schemas import ProviderSchema
+from .models import User
+from .schemas import UserSchema, AuthSchema
 
 from ..common.exceptions import InvalidUsage
 from ..common.responses import (
@@ -18,82 +24,98 @@ from ..common.responses import (
 from ..db import db
 
 
-provider_blueprint = Blueprint("users", __name__, url_prefix="/users")
-schema = ProviderSchema()
+user_blueprint = Blueprint("accounts", __name__, url_prefix="/accounts")
+auth_blueprint = Blueprint("auth", __name__, url_prefix="/auth")
+user_schema = UserSchema()
+auth_schema = AuthSchema()
 
 
+@auth_blueprint.route("/", methods=["POST"])
+@expects_json(AuthSchema.json())
+@jwt_optional
 def login():
-    pass
+    request_data = g.data
+    login = g.data.get("login")
+    password = g.data.get("password")
+
+    user = User.query.filter((User.login == login) & (User.is_active == True)).first()
+
+    if not user or user.validate_password(password) is False:
+        return response_not_found()
+
+    token = create_access_token(identity=user, fresh=True)
+
+    data = auth_schema.jsonify({"token": token})
+    return response_ok(data)
 
 
-def auth():
-    pass
-
-
-def logout():
-    pass
-
-
-def fetch_my():
-    pass
-
-
-@provider_blueprint.route("/", methods=["GET"])
+@user_blueprint.route("/", methods=["GET"])
+@jwt_required
 def listing():
-    paginate = Provider.query.paginate()
-    data = schema.jsonify(paginate.items, many=True)
+    paginate = User.query.paginate()
+    data = user_schema.jsonify(paginate.items, many=True)
     return response_listing(paginate, data)
 
 
-@provider_blueprint.route("/<int:id>", methods=["GET"])
+@user_blueprint.route("/<int:id>", methods=["GET"])
+@jwt_required
 def fetch(id):
-    instance = Provider.query.filter_by(id=id).first()
+    instance = User.query.filter_by(id=id).first()
 
     if not instance:
         return response_not_found()
 
-    data = schema.jsonify(instance)
+    data = user_schema.jsonify(instance)
     return response_ok(data)
 
 
-@provider_blueprint.route("/", methods=["POST"])
-@expects_json(ProviderSchema.json())
+@user_blueprint.route("/", methods=["POST"])
+@expects_json(UserSchema.json())
+@jwt_required
 def create():
     request_data = g.data
 
-    errors = schema.validate(request_data)
+    errors = user_schema.validate(request_data)
     if errors:
         raise InvalidUsage(errors)
 
-    instance = Provider.create(**request_data)
+    instance = User(**request_data)
+    instance.save()
 
-    data = schema.jsonify(instance)
+    instance.token = create_access_token(identity=instance, fresh=True)
+
+    data = user_schema.jsonify(instance)
     return response_created(data)
 
 
-@provider_blueprint.route("/<int:id>", methods=["PUT"])
-@expects_json(ProviderSchema.json())
+@user_blueprint.route("/<int:id>", methods=["PUT"])
+@expects_json(UserSchema.json())
+@jwt_required
 def update(id):
     request_data = g.data
 
-    errors = schema.validate(request_data)
-    if errors:
-        raise InvalidUsage(errors)
-
-    instance = Provider.query.filter_by(id=id).first()
+    instance = User.query.filter_by(id=id).first()
 
     if not instance:
         return response_not_found()
 
-    instance.update(**request_data)
+    user_schema.instance = instance
 
-    data = schema.jsonify(instance)
+    errors = user_schema.validate(request_data)
+    if errors:
+        raise InvalidUsage(errors)
+
+    request_data.pop("password")
+    instance.update(**request_data, commit=False)
+
+    data = user_schema.jsonify(instance)
 
     return response_ok(data)
 
 
-@provider_blueprint.route("/<int:id>", methods=["DELETE"])
+@user_blueprint.route("/<int:id>", methods=["DELETE"])
+@jwt_required
 def destroy(id):
-    instance = Provider.query.filter_by(id=id).first()
+    instance = User.query.filter_by(id=id).first()
     instance.delete()
     return response_no_content()
