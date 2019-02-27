@@ -2,6 +2,7 @@ import json
 
 from flask import g, Blueprint, Response, request
 from flask_expects_json import expects_json
+from flask_jwt_extended import jwt_required, current_user
 
 from .models import Provider
 from .schemas import ProviderSchema
@@ -23,6 +24,7 @@ schema = ProviderSchema()
 
 
 @provider_blueprint.route("/", methods=["GET"])
+@jwt_required
 def listing():
     paginate = Provider.query.paginate()
     data = schema.jsonify(paginate.items, many=True)
@@ -30,6 +32,7 @@ def listing():
 
 
 @provider_blueprint.route("/<int:id>", methods=["GET"])
+@jwt_required
 def fetch(id):
     instance = Provider.query.filter_by(id=id).first()
 
@@ -42,6 +45,7 @@ def fetch(id):
 
 @provider_blueprint.route("/", methods=["POST"])
 @expects_json(ProviderSchema.json())
+@jwt_required
 def create():
     request_data = g.data
 
@@ -57,6 +61,7 @@ def create():
 
 @provider_blueprint.route("/<int:id>", methods=["PUT"])
 @expects_json(ProviderSchema.json())
+@jwt_required
 def update(id):
     request_data = g.data
 
@@ -77,6 +82,7 @@ def update(id):
 
 
 @provider_blueprint.route("/<int:id>", methods=["DELETE"])
+@jwt_required
 def destroy(id):
     instance = Provider.query.filter_by(id=id).first()
     instance.delete()

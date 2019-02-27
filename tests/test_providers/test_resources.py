@@ -7,10 +7,10 @@ from hamcrest import assert_that, has_entries, has_key
 from bluestorm_api.providers.models import Provider
 
 
-def test_provider_resource_create(testapp):
+def test_provider_resource_create(user_client):
     data = {"name": "test", "phone": "+5516981784444"}
 
-    response = testapp.post_json(url_for("provider.create"), data)
+    response = user_client.post_json(url_for("provider.create"), data)
 
     assert response.status_code == 201
 
@@ -21,28 +21,32 @@ def test_provider_resource_create(testapp):
     assert_that(response.json, has_key("created"), has_key("updated"))
 
 
-def test_provider_resource_create_without_required_fields(testapp):
+def test_provider_resource_create_without_required_fields(user_client):
     data = {}
 
-    response = testapp.post_json(url_for("provider.create"), data, expect_errors=True)
+    response = user_client.post_json(
+        url_for("provider.create"), data, expect_errors=True
+    )
 
     assert response.status_code == 400
 
     assert_that(response.json, has_entries({"error": "'name' is a required property"}))
 
 
-def test_provider_resource_create_invalid_value(testapp):
+def test_provider_resource_create_invalid_value(user_client):
     data = {"name": "invalid", "phone": "invalid"}
 
-    response = testapp.post_json(url_for("provider.create"), data, expect_errors=True)
+    response = user_client.post_json(
+        url_for("provider.create"), data, expect_errors=True
+    )
 
     assert response.status_code == 400
 
     assert_that(response.json, has_entries({"error": "invalid phone number"}))
 
 
-def test_provider_resource_fetch(testapp, provider):
-    response = testapp.get(url_for("provider.fetch", id=provider.id))
+def test_provider_resource_fetch(user_client, provider):
+    response = user_client.get(url_for("provider.fetch", id=provider.id))
 
     assert response.status_code == 200
 
@@ -53,14 +57,14 @@ def test_provider_resource_fetch(testapp, provider):
     assert_that(response.json, has_key("created"), has_key("updated"))
 
 
-def test_provider_resource_fetch_non_existing(testapp):
-    response = testapp.get(url_for("provider.fetch", id=1), expect_errors=True)
+def test_provider_resource_fetch_non_existing(user_client):
+    response = user_client.get(url_for("provider.fetch", id=1), expect_errors=True)
 
     assert response.status_code == 404
 
 
-def test_provider_resource_listing(testapp, providers):
-    response = testapp.get(url_for("provider.listing"))
+def test_provider_resource_listing(user_client, providers):
+    response = user_client.get(url_for("provider.listing"))
     assert response.status_code == 200
 
     response = response.json
@@ -83,10 +87,10 @@ def test_provider_resource_listing(testapp, providers):
     assert len(response.get("results")) == 5
 
 
-def test_provider_resource_update(testapp, provider):
+def test_provider_resource_update(user_client, provider):
     data = {"name": "new-name", "phone": "+55 16 97122-2222"}
 
-    response = testapp.put_json(url_for("provider.update", id=provider.id), data)
+    response = user_client.put_json(url_for("provider.update", id=provider.id), data)
 
     assert response.status_code == 200
 
@@ -97,10 +101,10 @@ def test_provider_resource_update(testapp, provider):
     assert_that(response.json, has_key("created"), has_key("updated"))
 
 
-def test_provider_resource_update_passing_non_existing_field(testapp, provider):
+def test_provider_resource_update_passing_non_existing_field(user_client, provider):
     data = {"name": "new-name", "phone": "+55 16 97122-2222", "non-existing": True}
 
-    response = testapp.put_json(
+    response = user_client.put_json(
         url_for("provider.update", id=provider.id), data, expect_errors=True
     )
 
@@ -113,8 +117,8 @@ def test_provider_resource_update_passing_non_existing_field(testapp, provider):
     assert_that(response.json, has_key("created"), has_key("updated"))
 
 
-def test_provider_resource_destroy(testapp, provider):
-    response = testapp.delete(url_for("provider.destroy", id=provider.id))
+def test_provider_resource_destroy(user_client, provider):
+    response = user_client.delete(url_for("provider.destroy", id=provider.id))
 
     assert response.status_code == 204
     assert Provider.query.count() == 0
