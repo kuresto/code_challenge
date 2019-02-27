@@ -5,7 +5,7 @@ from flask_expects_json import expects_json
 from flask_jwt_extended import jwt_required, current_user
 
 from .models import Medicine
-from .schemas import MedicineSchema
+from .schemas import MedicineSchema, MedicineWithProviderSchema
 
 from ..common.exceptions import InvalidUsage
 from ..common.responses import (
@@ -20,7 +20,8 @@ from ..db import db
 
 
 medicine_blueprint = Blueprint("medicine", __name__, url_prefix="/medicines")
-schema = MedicineSchema()
+schema_write = MedicineSchema()
+schema = MedicineWithProviderSchema()
 
 
 @medicine_blueprint.route("/", methods=["GET"])
@@ -49,11 +50,11 @@ def fetch(id):
 def create():
     request_data = g.data
 
-    errors = schema.validate(request_data)
+    errors = schema_write.validate(request_data)
     if errors:
         raise InvalidUsage(errors)
 
-    instance = medicine.create(**request_data)
+    instance = Medicine.create(**request_data)
 
     data = schema.jsonify(instance)
     return response_created(data)
@@ -65,7 +66,7 @@ def create():
 def update(id):
     request_data = g.data
 
-    errors = schema.validate(request_data)
+    errors = schema_write.validate(request_data)
     if errors:
         raise InvalidUsage(errors)
 

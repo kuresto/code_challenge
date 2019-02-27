@@ -28,9 +28,10 @@ def create_app():
     # Common
     from .common.exceptions import InvalidUsage
     from .common.handlers import bad_request_handler
-    from .accounts.utils import jwt_identity, identity_loader
+    from .accounts.utils import jwt_identity, identity_loader, DecimalJSONEncoder
 
     app = Flask(__name__)
+    app.json_encoder = DecimalJSONEncoder
     app.config.from_object(environ.get("FLASK_SETTINGS_MODULE"))
 
     # database and migrations
@@ -64,5 +65,6 @@ def create_app():
     app.register_blueprint(provider_blueprint)  # Provider
     app.register_blueprint(user_blueprint)  # Users
     app.register_blueprint(customer_blueprint)  # Customers
+    app.register_blueprint(medicine_blueprint)  # Medicines
 
     return app
