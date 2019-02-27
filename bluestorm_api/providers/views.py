@@ -44,9 +44,24 @@ def create():
     return response_created(data)
 
 
+@provider_blueprint.route("/<int:id>", methods=["PUT"])
 def update(id):
-    return response_ok()
+    request_data = request.get_json(force=True)
+
+    instance = Provider.query.filter_by(id=id).first()
+
+    if not instance:
+        return response_not_found()
+
+    instance.update(**request_data)
+
+    data = schema.jsonify(instance)
+
+    return response_ok(data)
 
 
+@provider_blueprint.route("/<int:id>", methods=["DELETE"])
 def destroy(id):
+    instance = Provider.query.filter_by(id=id).first()
+    instance.delete()
     return response_no_content()

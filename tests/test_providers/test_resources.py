@@ -47,8 +47,21 @@ def test_provider_resource_listing(testapp, providers):
 
 
 def test_provider_resource_update(testapp, provider):
-    pass
+    data = {"name": "new-name"}
+
+    response = testapp.put_json(url_for("provider.update", id=provider.id), data)
+
+    assert response.status_code == 200
+
+    assert_that(
+        response.json, has_entries({"name": "new-name", "phone": "(16) 97122-2222"})
+    )
+    assert_that(response.json, has_key("id"))
+    assert_that(response.json, has_key("created"), has_key("updated"))
 
 
 def test_provider_resource_destroy(testapp, provider):
-    pass
+    response = testapp.delete(url_for("provider.destroy", id=provider.id))
+
+    assert response.status_code == 204
+    assert Provider.query.count() == 0
