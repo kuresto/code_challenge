@@ -1,11 +1,54 @@
-from flask import Blueprint
+from flask import Blueprint, Response, request
+from .models import Provider
+from .schemas import ProviderSchema
+
+from ..common.responses import (
+    response_created,
+    response_no_content,
+    response_not_found,
+    response_ok,
+)
+from ..db import db
+
 
 provider_blueprint = Blueprint("provider", __name__, url_prefix="/providers")
+schema = ProviderSchema()
 
 
-class ProviderViewSet:
-    oh = "ohh"
+@provider_blueprint.route("/", methods=["GET"])
+def listing():
+    instances = Provider.query.all()
 
-    @provider_blueprint.route("/", methods=["GET"])
-    def listing(self):
-        return "Teste" + self.oh
+    data = schema.jsonify(instances, many=True)
+    return response_ok(data)
+
+
+@provider_blueprint.route("/<int:id>", methods=["GET"])
+def fetch(id):
+    instance = Provider.query.filter_by(id=id).first()
+
+    if not instance:
+        return response_not_found()
+
+    data = schema.jsonify(instance)
+    return response_ok(data)
+
+
+@provider_blueprint.route("/", methods=["POST"])
+def create():
+    request_data = request.get_json(force=True)
+
+    instance = Provider(**request_data)
+    db.session.add(instance)
+    db.session.commit()
+
+    data = schema.jsonify(instance)
+    return response_created(data)
+
+
+def update(id):
+    return response_ok()
+
+
+def destroy(id):
+    return response_no_content()

@@ -1,8 +1,9 @@
+from flask_marshmallow.sqla import ModelSchema
+
 from .models import Provider
-from .. import marshmallow
 
 
-class ProviderSchema(marshmallow.ModelSchema):
+class ProviderSchema(ModelSchema):
     class Meta:
         model = Provider
 

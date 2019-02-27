@@ -1,4 +1,5 @@
 import pytest
+from webtest import TestApp
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -8,14 +9,31 @@ from bluestorm_api.app import create_app
 from bluestorm_api.db import db as _db
 
 
-@pytest.fixture(name="app", scope="function")
+@pytest.yield_fixture(name="app", scope="function")
 def fixture_app():
     app = create_app()
 
-    return app
+    ctx = app.test_request_context()
+    ctx.push()
+
+    yield app
+
+    ctx.pop()
 
 
-@pytest.yield_fixture(name="db", scope="function")
+@pytest.fixture(scope="function")
+def testapp(app):
+    return TestApp(app)
+
+
+@pytest.fixture(name="client")
+def fixture_client(app):
+    client = app.test_client()
+
+    return client
+
+
+@pytest.yield_fixture(name="db", autouse=True, scope="function")
 def fixture_db(app):
     connect = _db.engine.connect()
     connect.execute("COMMIT")

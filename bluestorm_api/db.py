@@ -1,3 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+from .common.mixins import CRUDMixin
+
+db = SQLAlchemy(model_class=CRUDMixin)
