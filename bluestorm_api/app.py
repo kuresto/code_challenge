@@ -8,6 +8,7 @@ from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from flask_minio import Minio
 
 
 def create_app():
@@ -21,13 +22,13 @@ def create_app():
 
     # Views
     from .accounts.views import user_blueprint, auth_blueprint
-    from .medicines.views import medicine_blueprint
+    from .medicines.views import medicine_blueprint, upload_blueprint
     from .providers.views import provider_blueprint
     from .customers.views import customer_blueprint
 
     # Common
     from .common.exceptions import InvalidUsage
-    from .common.handlers import bad_request_handler
+    from .common.handlers import bad_request_handler, unauthorized_handler
     from .accounts.utils import jwt_identity, identity_loader, DecimalJSONEncoder
 
     app = Flask(__name__)
@@ -56,9 +57,14 @@ def create_app():
     cors = CORS()
     cors.init_app(app)
 
+    # Minio
+    storage = Minio(app)
+    storage.init_app(app)
+
     # error handlers
     app.register_error_handler(InvalidUsage, bad_request_handler)
     app.register_error_handler(HTTPStatus.BAD_REQUEST, bad_request_handler)
+    app.register_error_handler(HTTPStatus.UNAUTHORIZED, unauthorized_handler)
 
     # blueprints
     app.register_blueprint(auth_blueprint)  # Authentication
@@ -66,5 +72,6 @@ def create_app():
     app.register_blueprint(user_blueprint)  # Users
     app.register_blueprint(customer_blueprint)  # Customers
     app.register_blueprint(medicine_blueprint)  # Medicines
+    app.register_blueprint(upload_blueprint)  # Medicines upload
 
     return app
