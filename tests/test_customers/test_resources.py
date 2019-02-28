@@ -122,3 +122,11 @@ def test_customer_resource_destroy(user_client, customer):
 
     assert response.status_code == 204
     assert customer.query.count() == 0
+
+
+def test_customer_resource_export_csv(user_client, customer_with_medicines):
+    response = user_client.get(
+        url_for("customer.export_csv", id=customer_with_medicines.id)
+    )
+
+    assert response.status_code == 200

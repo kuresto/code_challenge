@@ -38,6 +38,13 @@ def response_bad_request(data=""):
     return response
 
 
+def response_unauthorized(data=""):
+    response = make_response(data, HTTPStatus.UNAUTHORIZED)
+    response.headers["Content-Type"] = "application/json"
+
+    return response
+
+
 def response_listing(paginate, data=None):
     response = {
         "total": paginate.total,
