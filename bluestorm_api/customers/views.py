@@ -1,6 +1,9 @@
 import json
+import csv
 
-from flask import g, Blueprint, Response, request
+from io import StringIO
+
+from flask import g, Blueprint, Response, request, make_response
 from flask_expects_json import expects_json
 from flask_jwt_extended import jwt_required, current_user
 
@@ -87,3 +90,26 @@ def destroy(id):
     instance = Customer.query.filter_by(id=id).first()
     instance.delete()
     return response_no_content()
+
+
+@customer_blueprint.route("/<int:id>/export/", methods=["GET"])
+@jwt_required
+def export_csv(id):
+    instance = Customer.query.filter_by(id=id).first()
+
+    if not instance:
+        return response_not_found()
+
+    rows = [["user_id", "user_name", "medicine_id", "medicine_name"]]
+    for medicine in instance.medicines:
+        rows.append([instance.id, instance.name, medicine.id, medicine.name])
+
+    string_io = StringIO()
+
+    writer = csv.writer(string_io)
+    writer.writerows(rows)
+    response = make_response(string_io.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    response.headers["Content-type"] = "text/csv"
+
+    return response
