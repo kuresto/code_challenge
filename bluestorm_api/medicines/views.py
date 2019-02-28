@@ -40,6 +40,19 @@ csv_schema = {
 @upload_blueprint.route("/", methods=["POST"])
 @jwt_required
 def upload():
+    """Uploads a csv file
+    ---
+    description: "Receives a file from a form"
+    responses:
+      201:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+    """
     if "csv" not in request.files:
         return response_bad_request(jsonify({"error": "no key in request"}))
 
@@ -58,6 +71,18 @@ def upload():
 @jwt_required
 @expects_json(csv_schema)
 def process_csv():
+    """Imports from csv medications
+    ---
+    parameters:
+      - name: file
+        in: json
+        type: string
+        required: true
+        description: "Full filepath"
+    responses:
+      200:
+        description: OK.
+    """
 
     request_data = g.data
     csv_path = request_data.get("file")
@@ -144,6 +169,52 @@ def create():
 @expects_json(MedicineSchema.json())
 @jwt_required
 def update(id):
+    """Updates instance
+    ---
+    parameters:
+      - name: name
+        in: json
+        type: string
+        required: true
+      - name: kind
+        in: json
+        type: string
+        enum: [tablet, syrup, drops, capsule, eyedrops, solution, suspension, cream, ointment, injection]
+        required: true
+      - name: amount
+        in: json
+        type: number
+        required: true
+      - name: measure
+        in: json
+        type: string
+        required: true
+      - name: dosage
+        in: json
+        type: numer
+        required: true
+      - name: provider
+        in: json
+        type: object
+        required: true
+    responses:
+      200:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                phone:
+                  type: string
+                created:
+                  type: datetime
+                uppdated:
+                  type: datetime
+    """
     request_data = g.data
 
     errors = schema_write.validate(request_data)
@@ -165,6 +236,12 @@ def update(id):
 @medicine_blueprint.route("/<int:id>", methods=["DELETE"])
 @jwt_required
 def destroy(id):
+    """Removes instance
+    ---
+    responses:
+      204:
+        description: "Removed"
+    """
     instance = Medicine.query.filter_by(id=id).first()
     instance.delete()
     return response_no_content()

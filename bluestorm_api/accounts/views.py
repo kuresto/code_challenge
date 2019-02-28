@@ -34,6 +34,33 @@ auth_schema = AuthSchema()
 @expects_json(AuthSchema.json())
 @jwt_optional
 def login():
+    """Authenticates your user
+    ---
+    parameters:
+      - name: login
+        in: json
+        type: string
+        required: true
+      - name: password
+        in: json
+        type: string
+        required: true
+    responses:
+      200:
+        description: Token
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: Access token.
+        examples:
+          token: "access-token"
+      400:
+        description: Validation error
+    """
     request_data = g.data
     login = g.data.get("login")
     password = g.data.get("password")
@@ -52,6 +79,27 @@ def login():
 @user_blueprint.route("/", methods=["GET"])
 @jwt_required
 def listing():
+    """List users
+    ---
+    responses:
+      200:
+        description: Token
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                login:
+                  type: string
+                is_active:
+                  type: boolean
+                created:
+                  type: datetime
+                uppdated:
+                  type: datetime
+    """
     paginate = User.query.paginate()
     data = user_schema.jsonify(paginate.items, many=True)
     return response_listing(paginate, data)
@@ -60,6 +108,31 @@ def listing():
 @user_blueprint.route("/<int:id>", methods=["GET"])
 @jwt_required
 def fetch(id):
+    """Fetch single user
+    ---
+    parameters:
+      - name: id
+        in: json
+        type: integer
+        required: true
+    responses:
+      200:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                login:
+                  type: string
+                is_active:
+                  type: boolean
+                created:
+                  type: datetime
+                uppdated:
+                  type: datetime
+    """
     instance = User.query.filter_by(id=id).first()
 
     if not instance:
@@ -73,6 +146,39 @@ def fetch(id):
 @expects_json(UserSchema.json())
 @jwt_required
 def create():
+    """Create single user
+    ---
+    parameters:
+      - name: login
+        in: json
+        type: string
+        required: true
+      - name: password
+        in: json
+        type: string
+        required: true
+      - name: id
+        in: json
+        type: is_active
+        required: boolean
+    responses:
+      201:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                login:
+                  type: string
+                is_active:
+                  type: boolean
+                created:
+                  type: datetime
+                uppdated:
+                  type: datetime
+    """
     request_data = g.data
 
     errors = user_schema.validate(request_data)
@@ -92,6 +198,39 @@ def create():
 @expects_json(UserSchema.json())
 @jwt_required
 def update(id):
+    """Updates single user
+    ---
+    parameters:
+      - name: login
+        in: json
+        type: string
+        required: true
+      - name: password
+        in: json
+        type: string
+        required: true
+      - name: id
+        in: json
+        type: is_active
+        required: boolean
+    responses:
+      200:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                login:
+                  type: string
+                is_active:
+                  type: boolean
+                created:
+                  type: datetime
+                uppdated:
+                  type: datetime
+    """
     request_data = g.data
 
     instance = User.query.filter_by(id=id).first()
@@ -116,6 +255,12 @@ def update(id):
 @user_blueprint.route("/<int:id>", methods=["DELETE"])
 @jwt_required
 def destroy(id):
+    """Removes single user
+    ---
+    responses:
+      204:
+        description: "Removed"
+    """
     instance = User.query.filter_by(id=id).first()
     instance.delete()
     return response_no_content()

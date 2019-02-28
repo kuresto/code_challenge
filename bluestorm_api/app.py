@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_minio import Minio
+from flasgger import Swagger
 
 
 def create_app():
@@ -60,6 +61,10 @@ def create_app():
     # Minio
     storage = Minio(app)
     storage.init_app(app)
+
+    # Swagger
+    swagger = Swagger()
+    swagger.init_app(app)
 
     # error handlers
     app.register_error_handler(InvalidUsage, bad_request_handler)

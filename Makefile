@@ -5,6 +5,9 @@ help: ## make [target]
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 	@echo
 
+start-local:  ## start-development on local
+	sh ./run.sh
+
 copy-keys: ## Copy your ssh keys for third party purposes
 	mkdir -p .keys
 	cp ~/.ssh/id_rsa ./.keys/id_rsa
