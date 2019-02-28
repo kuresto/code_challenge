@@ -1,0 +1,72 @@
+version: "3"
+services:
+  # API Docker
+  bluestorm_api:
+    container_name: bluestorm-api-dev
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile
+    command: /bin/bash -c "dockerize -wait tcp://bluestorm_db:3306 && flask run"
+    environment:
+      - PYTHONUNBUFFERED=0
+      - FLASK_SETTINGS_MODULE=bluestorm_api.settings.development
+      - FLASK_APP=/code/bluestorm_api/
+      - MINIO_ACCESS_KEY=X0UPMLLFW54LALL86ND6
+      - MINIO_SECRET_KEY=F3evyDre0kr4x4u8QFtR6iUmQc+0RVyB/m171TGI
+      - MINIO_ENDPOINT=http://bluestorm_minio:9000/
+    volumes:
+      - ../../:/code/
+    ports:
+      - "8000:8000"
+      - "5000:5000"
+    links:
+      - bluestorm_db
+      - bluestorm_minio
+    depends_on:
+      - bluestorm_db
+      - bluestorm_minio
+
+  # Proxy Server (Workspace)
+  bluestorm_proxy_server:
+    restart: always
+    image: nginx
+    volumes:
+      - ./nginx/proxy_server/:/etc/nginx/conf.d
+      - ../../static:/code/static
+      - ../../bluestorm_admin:/code/
+    links:
+      - bluestorm_api
+    depends_on:
+      - bluestorm_api
+    ports:
+      - "3000:80"
+  
+  # Database Docker
+  bluestorm_db:
+    container_name: bluestorm-db-dev
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=bluestorm_api
+    volumes:
+      - data-volume:/var/lib/mysql
+    command:
+      mysqld --sql_mode=""
+
+  # Storage Docker
+  bluestorm_minio:
+    container_name: bluestorm-minio-dev
+    image: minio/minio:latest
+    environment:
+      - MINIO_ACCESS_KEY=X0UPMLLFW54LALL86ND6
+      - MINIO_SECRET_KEY=F3evyDre0kr4x4u8QFtR6iUmQc+0RVyB/m171TGI
+    ports:
+      - "9000:9000"
+    command: minio server /s3-folder
+    volumes:
+      - s3-folder:/s3-folder
+volumes:
+  data-volume:
+  s3-folder:
