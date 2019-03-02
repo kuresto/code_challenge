@@ -6,7 +6,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/development/Dockerfile
-    command: /bin/bash -c "dockerize -wait tcp://bluestorm_db:3306 && flask run"
+    command: /bin/bash -c "dockerize -wait tcp://bluestorm_db:3306 && flask run --host=0.0.0.0"
     environment:
       - PYTHONUNBUFFERED=0
       - FLASK_SETTINGS_MODULE=bluestorm_api.settings.development
