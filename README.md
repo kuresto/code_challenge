@@ -59,8 +59,5 @@ About 94%.
 ### - WTF This upload?
 I know, it's bad.
 
-### - 
-In the server, duh.
-
 ### - Something you didn't like about this project?
 See "There something missing?"
