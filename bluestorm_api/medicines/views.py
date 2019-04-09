@@ -87,7 +87,6 @@ def process_csv():
     request_data = g.data
     csv_path = request_data.get("file")
 
-    # TODO: This should be a task (celery)
     uploaded_csv = minio_get(csv_path)
 
     f = StringIO(uploaded_csv.data.decode())
